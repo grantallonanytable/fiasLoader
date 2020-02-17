@@ -17,23 +17,30 @@
 При парсинге учитывается уровень объектов базы (не выше 6), загружаютс актуальные записи.
 5. После испорта базы ФИАС происходит сопоставление загруженных регионов регионам и кодам ATG, (пере)создание таблицы с городами для репозитория ATG.
 6. После этого приложение работает в режиме сервиса и ожидает запросов на выгрузку CSV-файлов в формате репозитория ATG:
+
 ```
 SOAP http://localhost:8080/export/cities[?area=<area_id>]
 ```
 
 ## Конгфигурация (application.yml)
 Обозначение: конфигурация
+
 ```
 ParamA:
   ParamB:
     ParamC: value
 ```
 равноценна
+
 ```
 ParamA.ParamB.ParamC: value
 ```
+
 ### Загрузка (DownloadFilesSсheduler).
+
 По расписанию (по ум.-раз в час).
+
+```
 download:
   period: 3600000 - период.
   need: true - признак необходимости загрузки.
@@ -42,9 +49,15 @@ download:
     Нужна всегда при скачивании!
     Если не нужна- в папку unpack.dir поместить XML или в папку work.dir поместить архив.
 
+```
+
 ### Обработка (ProceedFilesSсheduler).
 По расписанию (по ум.-раз в день).
+
+```
+
 work.period: 86400000 - период.
+```
 
 Этот этап включает в себя распаковку файлов:
 
@@ -124,25 +137,34 @@ com.oracle.ojdbc:ojdbc8:19.3.0.0 -> oracle.jdbc.driver.OracleDriver
 
 ### Запуск из Idea
 В конфигурации fiasLoader[bootRun] проверить:
+
 ```
 Gradle Project: fiasloader
 Tasks: bootRun
 ```
+
 Добавить поштучно Enviroment variables, должна получиться строка:
+
 ```
 DOWNLOAD_NEED=false;WORK_ARCHDIR=x:\\fias\\archive;WORK_DIR=x:\\fias\\work;UNPACK_DIR=x:\\fias\\unpack;DOWNLOAD_DIR=x:\\fias\\work;DOWNLOAD_TMP=x:\\fias\\tmp
 ```
+
 ### Запуск из скрипта (DEV)
+
 ```
 [<PARAM>=<value> ] bash gradlew bootRun
 ```
-<PARAM> - переменные из `application.yml`, написанные капсом и содержащие `_` вместо точки.
+
+`<PARAM>` - переменные из `application.yml`, написанные капсом и содержащие `_` вместо точки.
 Пример
+
 ```
  WORK_DIR=x:\\fias\\work WORK_ARCHDIR=x:\\fias\\archive DOWNLOAD_NEED=false UNPACK_NEED=false bash gradlew bootRun
 ```
+
 ### Запуск из bash.
 Локально:
+
 ```
 export DOWNLOAD_NEED=false
 export DOWNLOAD_TMP=x:\\fias\\tmp
@@ -162,24 +184,33 @@ java -jar  fiasloader-0.3.0.jar
 
 ### Выгрузка справочника городов в формате репозитория ATG
 Есть эндпоинт с опциональным параметром (значение параметра может быть пустым или параметр можно не указывать)
+
 ```
 SOAP http://localhost:8080/export/cities?area=<area_id>
 ```
+
 #### Для контейнера
+
 ```
 http://<test_stand_ip>:9080/export/cities?area=<area_id>
 ```
-В расшаренной папке изменить докер-файл `docker-compose.yml`, добавить маршрутизацию порта: ```
+В расшаренной папке изменить докер-файл `docker-compose.yml`, добавить маршрутизацию порта:
+
+```
 - "9080:8080"
 ```
+
 #### Справка
 Получение README.md:
+
 ```
 SOAP http://localhost:8080/readme
 ```
+
 ## Вспомогательные скрипты
 ### Получение полного имени объекта.
 По `AOGUID` объекта с уровнем 6:
+
 ```
 select
   listagg(a.SHORTNAME||' '||a.FORMALNAME, ', ') within group (order by a.AOLEVEL desc) TheFullName
@@ -187,6 +218,7 @@ from FIAS_ADDROBJ a
 connect by prior a.PARENTGUID=a.AOGUID
 start with a.AOGUID=:AOGUID
 ```
+
 ### Подготовленные данные после загрузки справочника можно получить так:
 
 ```
