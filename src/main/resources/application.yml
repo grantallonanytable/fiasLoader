@@ -1,0 +1,60 @@
+#config:
+#  crontime: 0 * * * * ?
+#
+#mail: bek@prog-matik.ru
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+     jdbc:
+       batch_size: 1000
+  datasource:
+    url: jdbc:oracle:thin:@//t2ru-ds-test-02:2521/TELE2
+    userName: C##LOADER
+    password: Welcome1
+    driver: oracle.jdbc.driver.OracleDriver
+
+
+client:
+  default-uri: http://fias.nalog.ru/WebServices/Public/DownloadService.asmx
+  ssl:
+    trust-store: classpath:jks/nalog.ru.jks
+    trust-store-password: nalog.ru-pass
+  readTimeoutMsec: 1000
+  connTimeoutMsec: 1000
+
+# DownloadFilesScheduler
+download:
+  period: 3600000
+  need: true
+  tmp: tmp
+  dir: work
+
+# ProcessFilesScheduler
+upack:
+  need: true
+  dir: unpack
+work:
+  period: 86400000
+  dir: work
+  archDir: archive
+  fileMasks: AS_ADDROBJ,AS_DEL_ADDROBJ,AS_SOCRBASE
+  batch_size:
+    xml: 1000
+    sql: 1000
+  query:
+    addrobj_merge: merge into FIAS_ADDROBJ using dual on (aoguid=? and aoid=?) when matched then update set aolevel=?,formalname=?,offname=?,parentguid=?,regioncode=?,shortname=? when not matched then insert (aoguid,aoid,aolevel,formalname,offname,parentguid,regioncode,shortname) values (?,?,?,?,?,?,?,?)
+    addrobj_del: delete from FIAS_ADDROBJ where aoid=?
+    socr_insert: merge into FIAS_SOCR using dual on (kod_t_st=?) when matched then update set code=?, socr_level=?, name=? when not matched then insert (kod_t_st, code, socr_level, name) values(?, ?, ?, ?)
+    createAtgCities: begin updateAtgAreasCodes; recreateAtgCitiesTable; end;
+
+addrobj:
+  frombatchn: 0
+  tobatchn: -1
+
+logging:
+  level:
+    root: info
+  file: log/application.log
